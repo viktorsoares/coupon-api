@@ -1,6 +1,8 @@
 package com.example.coupon.entity;
 
-import com.example.coupon.exception.BusinessException;
+import com.example.coupon.value.CouponCode;
+import com.example.coupon.value.DiscountValue;
+import com.example.coupon.value.ExpirationDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -45,51 +47,29 @@ public class CouponEntity {
 
     protected CouponEntity() {}
 
-    public static CouponEntity create(String code, String description, BigDecimal discountValue,
-                                      LocalDateTime expirationDate, boolean published) {
-        CouponEntity coupon = new CouponEntity();
-        coupon.code = code;
-        coupon.description = description;
-        coupon.discountValue = discountValue;
-        coupon.expirationDate = expirationDate;
-        coupon.published = published;
-        coupon.redeemed = false;
-        coupon.status = CouponStatus.ACTIVE;
+    public static CouponEntity create(String rawCode, String description, BigDecimal discount, LocalDateTime expiration, boolean published) {
+        CouponCode code = new CouponCode(rawCode);
+        DiscountValue discountValue = new DiscountValue(discount);
+        ExpirationDate expirationDate = new ExpirationDate(expiration);
 
-        coupon.validateForCreation();
-        return coupon;
-    }
-
-    public void validateForCreation() {
-        validateCode();
-        validateDiscount();
-        validateExpirationDate();
-    }
-
-    private void validateCode() {
-        if (code == null || code.length() != 6 || !code.matches("[A-Z0-9]{6}")) {
-            throw new BusinessException("Coupon code must have exactly 6 alphanumeric");
-        }
-    }
-
-    private void validateDiscount() {
-        if (discountValue == null || discountValue.compareTo(BigDecimal.valueOf(0.5)) < 0) {
-            throw new BusinessException("Minimum discount value is 0.5");
-        }
-    }
-
-    private void validateExpirationDate() {
-        if (expirationDate == null || expirationDate.isBefore(LocalDateTime.now())) {
-            throw new BusinessException("Expiration date cannot be in the past");
-        }
+        CouponEntity entity = new CouponEntity();
+        entity.code = code.getCode();
+        entity.description = description;
+        entity.discountValue = discountValue.getValue();
+        entity.expirationDate = expirationDate.getExpiration();
+        entity.status = CouponStatus.ACTIVE;
+        entity.published = published;
+        entity.redeemed = false;
+        return entity;
     }
 
     public void markAsDeleted() {
         if (this.status == CouponStatus.DELETED) {
-            throw new BusinessException("Coupon already deleted");
+            throw new com.example.coupon.exception.BusinessException("Coupon already deleted");
         }
         this.status = CouponStatus.DELETED;
     }
+
 
     public UUID getId() {
         return id;

@@ -23,13 +23,11 @@ public class CouponService {
 
     @Transactional
     public CouponEntity create(CouponRequest request) {
-        String sanitizedCode = request.getCode().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
-
-        repository.findByCode(sanitizedCode)
+        repository.findByCode(request.getCode().replaceAll("[^a-zA-Z0-9]", "").toUpperCase())
                 .ifPresent(c -> { throw new BusinessException("Coupon code already exists"); });
 
         CouponEntity coupon = CouponEntity.create(
-                sanitizedCode,
+                request.getCode(),
                 request.getDescription(),
                 request.getDiscountValue(),
                 request.getExpirationDate(),

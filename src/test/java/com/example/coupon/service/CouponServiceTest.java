@@ -56,7 +56,7 @@ class CouponServiceTest {
                 () -> service.create(request)
         );
 
-        assertEquals("Coupon code must have exactly 6 alphanumeric", ex.getMessage());
+        assertEquals("Coupon code must have exactly 6 alphanumeric characters", ex.getMessage());
     }
 
     @Test
